@@ -1,9 +1,19 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Loja de Futebol</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Resenha Sports</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="shortcut icon" href="./image/camisa.gif">
+
+<style>
+body { font-family:'Segoe UI', Roboto, Helvetica, Arial; }
+.card { transition: .3s; }
+.card:hover { transform: translateY(-6px); }
+</style>
 </head>
 
 <body class="bg-light">
@@ -90,8 +100,12 @@ Adicionar ao Carrinho
 </button>
 
 <button class="btn btn-outline-primary w-100 rounded-pill mt-2 ver"
-data-nome="${p.nome}" data-preco="${p.preco}"
-data-img="${p.img}" data-desc="${p.desc}">
+data-bs-toggle="modal"
+data-bs-target="#modalProduto"
+data-nome="${p.nome}" 
+data-preco="${p.preco}"
+data-img="${p.img}" 
+data-desc="${p.desc}">
 Ver mais
 </button>
 </div>
@@ -107,23 +121,55 @@ Ver mais
 <div class="modal fade" id="modalProduto">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content rounded-4">
+
 <div class="modal-header bg-dark text-white">
 <h5 id="mTitulo"></h5>
 <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 </div>
+
 <div class="modal-body text-center">
+
 <img id="mImg" class="img-fluid rounded mb-3">
+
 <p id="mDesc" class="text-muted"></p>
+
 <h4 class="text-primary">R$ <span id="mPreco"></span>,00</h4>
+
+<div class="mt-3">
+<label class="fw-bold">Escolha o tamanho:</label>
+
+<div class="d-flex justify-content-center gap-2 mt-2">
+
+<input type="radio" class="btn-check" name="tamanho" id="p" value="P">
+<label class="btn btn-outline-dark" for="p">P</label>
+
+<input type="radio" class="btn-check" name="tamanho" id="m" value="M">
+<label class="btn btn-outline-dark" for="m">M</label>
+
+<input type="radio" class="btn-check" name="tamanho" id="g" value="G">
+<label class="btn btn-outline-dark" for="g">G</label>
+
+<input type="radio" class="btn-check" name="tamanho" id="gg" value="GG">
+<label class="btn btn-outline-dark" for="gg">GG</label>
+
 </div>
+</div>
+
+<div class="mt-3">
+<label class="fw-bold">Quantidade:</label>
+<input type="number" id="quantidade" class="form-control mt-2" value="1" min="1">
+</div>
+
+</div>
+
 <div class="modal-footer">
 <button class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
 <button id="mAdd" class="btn btn-primary fw-bold">Adicionar</button>
 </div>
-</div>
-</div>
-</div>
 
+</div>
+</div>
+</div>
 <!-- MODAL CARRINHO -->
 <div class="modal fade" id="cartModal">
 <div class="modal-dialog modal-dialog-centered">
@@ -139,6 +185,11 @@ Ver mais
 <span>Total:</span>
 <span>R$ <span id="cart-total">0</span>,00</span>
 </div>
+
+<button id="finalizar-compra" class="btn btn-success w-100 mt-3">
+Finalizar Compra
+</button>
+
 </div>
 </div>
 </div>
@@ -175,7 +226,7 @@ return;
 }
 
 carrinho.forEach((item, i) => {
-total += Number(item.preco);
+total += item.preco * item.quantidade;
 cartItems.innerHTML += `
 <div class="d-flex align-items-center mb-3">
 <img src="./image/${item.img}" width="60" class="rounded me-3">
@@ -195,8 +246,34 @@ carrinho.splice(i,1);
 atualizarCarrinho();
 }
 
+function aumentarQuantidade(i){
+carrinho[i].quantidade++;
+atualizarCarrinho();
+}
+
+function diminuirQuantidade(i){
+if(carrinho[i].quantidade > 1){
+carrinho[i].quantidade--;
+}else{
+carrinho.splice(i,1);
+}
+atualizarCarrinho();
+
+}
+
 document.querySelectorAll(".add").forEach(b=>{
-b.onclick=()=>{ carrinho.push(b.dataset); atualizarCarrinho(); }
+b.onclick=()=>{
+
+carrinho.push({
+nome: b.dataset.nome,
+preco: Number(b.dataset.preco),
+img: b.dataset.img,
+quantidade: 1
+});
+
+atualizarCarrinho();
+
+}
 });
 
 const modalProduto = new bootstrap.Modal(modalProduto);
@@ -213,7 +290,32 @@ modalProduto.show();
 };
 });
 
-mAdd.onclick=()=>{ carrinho.push(atual); atualizarCarrinho(); modalProduto.hide(); };
+mAdd.onclick = () => {
+
+let tamanho = document.querySelector('input[name="tamanho"]:checked');
+let quantidade = Number(document.getElementById("quantidade").value);
+
+if(!tamanho){
+alert("Escolha um tamanho!");
+return;
+}
+
+carrinho.push({
+nome: atual.nome,
+preco: Number(atual.preco),
+img: atual.img,
+tamanho: tamanho.value,
+quantidade: quantidade
+});
+
+atualizarCarrinho();
+modalProduto.hide();
+
+};
+
+atualizarCarrinho();
+modalProduto.hide();
+
 
 document.getElementById("cartModal")
 .addEventListener("show.bs.modal", renderizarCarrinho);
@@ -221,7 +323,45 @@ document.getElementById("cartModal")
 ano.innerText = ano2.innerText = new Date().getFullYear();
 atualizarCarrinho();
 </script>
+<!DOCTYPE html>
+<html>
+<head>
+<title>Loja de Camisas</title>
+</head>
 
+<body>
+
+<h1>Minha Loja</h1>
+
+<button onclick="mostrarOpcoes('opcoes1')">Ver mais</button>
+
+<div id="opcoes1" style="display:none;">
+  <p>Tamanho:</p>
+  <select>
+    <option>P</option>
+    <option>M</option>
+    <option>G</option>
+  </select>
+
+  <p>Quantidade:</p>
+  <input type="number" value="1">
+</div>
+
+
+<script>
+function mostrarOpcoes(id) {
+  var opcoes = document.getElementById(id);
+
+  if (opcoes.style.display === "none") {
+    opcoes.style.display = "block";
+  } else {
+    opcoes.style.display = "none";
+  }
+}
+</script>
+
+</body>
+</html>
 </body>
 </html>
 
