@@ -122,8 +122,19 @@ Cadastro
 
 <form id="loginForm">
 
+<script>
 
+document.getElementById("loginForm")
+.addEventListener("submit", function(e){
 
+e.preventDefault()
+
+// aqui você pode validar depois se quiser
+
+window.location.href = "index.html"
+
+})
+</script>
 <div class="mb-3">
 
 <label class="form-label fw-bold text-muted" style="font-size: 0.75rem;">E-mail do Usuário</label>
